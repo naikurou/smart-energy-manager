@@ -1,5 +1,6 @@
 package com.smartenergy.service;
 
+import com.smartenergy.dao.DatabaseManager;
 import com.smartenergy.model.EnergyRecord;
 import com.smartenergy.model.TypeEnergie;
 import org.junit.jupiter.api.*;
@@ -16,6 +17,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class EnergyServiceTest {
 
     private EnergyService service;
+
+    @BeforeAll
+    static void initDatabase() {
+        DatabaseManager.setDatabaseUrl("jdbc:sqlite::memory:");
+        DatabaseManager.getInstance().initialiserBase();
+    }
 
     @BeforeEach
     void setUp() {

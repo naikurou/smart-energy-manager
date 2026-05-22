@@ -2,7 +2,6 @@ module com.smartenergy {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
-    requires javafx.charts;
     requires java.sql;
 
     opens com.smartenergy to javafx.fxml;

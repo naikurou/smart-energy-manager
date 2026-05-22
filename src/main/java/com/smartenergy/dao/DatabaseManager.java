@@ -15,7 +15,7 @@ import java.sql.Statement;
 public class DatabaseManager {
 
     /** URL de connexion SQLite — le fichier est créé dans le répertoire d'exécution */
-    private static final String URL_BDD = "jdbc:sqlite:smart_energy.db";
+    private static String urlBdd = "jdbc:sqlite:smart_energy.db";
 
     /** Instance unique du gestionnaire (pattern Singleton) */
     private static DatabaseManager instance;
@@ -42,6 +42,18 @@ public class DatabaseManager {
     }
 
     /**
+     * Permet de modifier l'URL de la base de données (très utile pour utiliser une base en mémoire lors des tests).
+     *
+     * @param url La nouvelle URL JDBC SQLite
+     */
+    public static synchronized void setDatabaseUrl(String url) {
+        urlBdd = url;
+        if (instance != null) {
+            instance.fermerConnexion();
+        }
+    }
+
+    /**
      * Retourne la connexion active à la base de données.
      * Crée une nouvelle connexion si elle n'existe pas ou est fermée.
      *
@@ -51,7 +63,7 @@ public class DatabaseManager {
     public Connection getConnexion() {
         try {
             if (connexion == null || connexion.isClosed()) {
-                connexion = DriverManager.getConnection(URL_BDD);
+                connexion = DriverManager.getConnection(urlBdd);
                 // Active les clés étrangères (désactivées par défaut dans SQLite)
                 connexion.createStatement().execute("PRAGMA foreign_keys = ON");
             }
