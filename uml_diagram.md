@@ -1,19 +1,6 @@
-# Diagramme de Classes UML - Smart Energy Manager
 
-Ce document présente l'architecture globale du projet **Smart Energy Manager** sous forme de diagrammes UML (modélisation des classes et des relations).
 
-## Architecture Globale (MVC + Service + DAO)
-
-L'application est structurée en plusieurs couches logiques :
-- **Couche Modèle (Model)** : Représentation des données métier (POJO).
-- **Couche Contrôleur (Controller)** : Gestion des interactions utilisateur et contrôle de la vue JavaFX (FXML).
-- **Couche Service** : Logique métier globale, calculs analytiques et validation.
-- **Couche DAO (Data Access Object)** : Persistance des données dans la base de données SQLite locale.
-- **Couche Utilitaires (Util)** : Traitement de fichiers (CSV) et génération de données.
-
----
-
-## Diagramme de Classes UML (Mermaid)
+## Diagramme de Classes UML 
 
 ```mermaid
 classDiagram
@@ -236,11 +223,4 @@ classDiagram
     }
 ```
 
----
 
-## Explications des Couches et Interactions
-
-1. **Persistance locale** : `DatabaseManager` initialise SQLite et fournit la connexion active aux DAO.
-2. **Couche DAO** : Gère l'accès direct aux tables SQLite (`batiments` et `energy_records`). Les requêtes préparées (`PreparedStatement`) sont utilisées systématiquement.
-3. **Couche Service** : `BatimentService` et `EnergyService` contiennent les règles de validation (ex: vérification de surface, années de construction cohérentes) et l'algorithme analytique d'anomalies (méthode statistique basée sur la règle des 2 sigmas).
-4. **Couche Controller (JavaFX)** : Récupère les données des services et met à jour dynamiquement les vues FXML.
