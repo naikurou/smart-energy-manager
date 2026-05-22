@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.smartenergy.controller.DashboardController"
+            fitToWidth="true" styleClass="scroll-pane">
+
+    <VBox spacing="24" styleClass="page-container">
+        <padding><Insets top="32" bottom="32" left="32" right="32"/></padding>
+
+        <!-- ===== EN-TÊTE DE PAGE ===== -->
+        <HBox alignment="CENTER_LEFT" spacing="16">
+            <Label text="🏠 Tableau de bord" styleClass="page-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="🔄 Actualiser" onAction="#actualiserTableauDeBord"
+                    styleClass="btn-secondary"/>
+        </HBox>
+
+        <!-- ===== LIGNE 1 : KPI PRINCIPAUX ===== -->
+        <HBox spacing="16">
+            <!-- Consommation Jour -->
+            <VBox styleClass="kpi-card, kpi-blue" HBox.hgrow="ALWAYS">
+                <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+                <Label text="☀ AUJOURD'HUI" styleClass="kpi-label"/>
+                <Label fx:id="labelConsommationJour" text="0.00 unités" styleClass="kpi-value"/>
+                <Label text="Consommation du jour" styleClass="kpi-subtitle"/>
+            </VBox>
+
+            <!-- Consommation Mois -->
+            <VBox styleClass="kpi-card, kpi-green" HBox.hgrow="ALWAYS">
+                <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+                <Label text="📅 CE MOIS" styleClass="kpi-label"/>
+                <Label fx:id="labelConsommationMois" text="0.00 unités" styleClass="kpi-value"/>
+                <Label text="Consommation mensuelle" styleClass="kpi-subtitle"/>
+            </VBox>
+
+            <!-- Consommation Année -->
+            <VBox styleClass="kpi-card, kpi-orange" HBox.hgrow="ALWAYS">
+                <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+                <Label text="📆 CETTE ANNÉE" styleClass="kpi-label"/>
+                <Label fx:id="labelConsommationAnnee" text="0.00 unités" styleClass="kpi-value"/>
+                <Label text="Consommation annuelle" styleClass="kpi-subtitle"/>
+            </VBox>
+
+            <!-- Coût mensuel -->
+            <VBox styleClass="kpi-card, kpi-purple" HBox.hgrow="ALWAYS">
+                <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+                <Label text="💰 COÛT ESTIMÉ" styleClass="kpi-label"/>
+                <Label fx:id="labelCoutMois" text="0.00 €" styleClass="kpi-value"/>
+                <Label text="Facture mensuelle estimée" styleClass="kpi-subtitle"/>
+            </VBox>
+        </HBox>
+
+        <!-- ===== LIGNE 2 : BÂTIMENTS ET KPI ÉNERGIE ===== -->
+        <HBox spacing="16">
+            <!-- Résumé bâtiments -->
+            <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="12">
+                <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+                <Label text="🏢 Résumé des bâtiments" styleClass="card-title"/>
+
+                <HBox spacing="16" alignment="CENTER_LEFT">
+                    <Label text="Nombre de bâtiments :" styleClass="stat-label"/>
+                    <Label fx:id="labelNombreBatiments" text="0" styleClass="stat-value"/>
+                </HBox>
+
+                <HBox spacing="16" alignment="CENTER_LEFT">
+                    <Label text="Plus consommateur :" styleClass="stat-label"/>
+                    <Label fx:id="labelBatimentPlusConsommateur" text="—" styleClass="stat-highlight"/>
+                </HBox>
+
+                <Region VBox.vgrow="ALWAYS"/>
+
+                <Button text="Gérer les bâtiments →" styleClass="btn-link"
+                        onAction="#ouvrirGestionBatiments"/>
+            </VBox>
+
+            <!-- KPI par type d'énergie -->
+            <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="12">
+                <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+                <Label text="⚡ Consommation par énergie" styleClass="card-title"/>
+
+                <Label text="Électricité" styleClass="energy-label"/>
+                <ProgressBar fx:id="progressBarElec" maxWidth="Infinity" styleClass="progress-elec"/>
+                <Label fx:id="labelKpiElec" text="0.00 kWh" styleClass="energy-value"/>
+
+                <Label text="Eau" styleClass="energy-label"/>
+                <ProgressBar fx:id="progressBarEau" maxWidth="Infinity" styleClass="progress-eau"/>
+                <Label fx:id="labelKpiEau" text="0.00 m³" styleClass="energy-value"/>
+
+                <Label text="Gaz" styleClass="energy-label"/>
+                <ProgressBar fx:id="progressBarGaz" maxWidth="Infinity" styleClass="progress-gaz"/>
+                <Label fx:id="labelKpiGaz" text="0.00 m³" styleClass="energy-value"/>
+            </VBox>
+        </HBox>
+
+        <!-- ===== LIGNE 3 : ALERTES ===== -->
+        <VBox styleClass="card" spacing="12">
+            <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label text="🔔 Alertes actives" styleClass="card-title"/>
+                <Label fx:id="labelNombreAlertes" text="0" styleClass="badge"/>
+            </HBox>
+
+            <ListView fx:id="listViewAlertes" prefHeight="120" styleClass="alerts-list"/>
+        </VBox>
+
+        <!-- ===== LIGNE 4 : ACTIONS RAPIDES ===== -->
+        <VBox styleClass="card" spacing="12">
+            <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+            <Label text="⚡ Actions rapides" styleClass="card-title"/>
+
+            <HBox spacing="12">
+                <Button text="➕ Nouveau bâtiment" styleClass="btn-primary"
+                        onAction="#ouvrirGestionBatiments"/>
+                <Button text="📝 Saisir consommation" styleClass="btn-primary"
+                        onAction="#ouvrirSaisieConsommation"/>
+                <Button text="📊 Voir les graphiques" styleClass="btn-secondary"
+                        onAction="#ouvrirVisualisations"/>
+            </HBox>
+        </VBox>
+
+    </VBox>
+</ScrollPane>

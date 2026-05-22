@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.smartenergy.controller.ConsommationController"
+      spacing="16" styleClass="page-container">
+
+    <padding><Insets top="24" bottom="24" left="24" right="24"/></padding>
+
+    <!-- ===== EN-TÊTE ===== -->
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label text="📊 Gestion des Consommations" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="labelStatut" text="" styleClass="statut-label"/>
+    </HBox>
+
+    <!-- ===== CONTENU PRINCIPAL ===== -->
+    <HBox spacing="16" VBox.vgrow="ALWAYS">
+
+        <!-- COLONNE GAUCHE : Formulaire de saisie et import -->
+        <VBox spacing="12" prefWidth="380">
+
+            <!-- Sélection du bâtiment -->
+            <VBox styleClass="card" spacing="12">
+                <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+                <Label text="🏢 Sélection du bâtiment" styleClass="card-title"/>
+                <ComboBox fx:id="comboBatiment" maxWidth="Infinity"
+                          promptText="Sélectionner un bâtiment"/>
+            </VBox>
+
+            <!-- Formulaire de saisie manuelle -->
+            <VBox styleClass="card" spacing="12">
+                <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+                <Label text="✏ Saisie manuelle" styleClass="card-title"/>
+
+                <Label text="Type d'énergie *" styleClass="form-label"/>
+                <ComboBox fx:id="comboTypeEnergie" maxWidth="Infinity"/>
+
+                <HBox spacing="8">
+                    <VBox HBox.hgrow="ALWAYS" spacing="4">
+                        <Label text="Date *" styleClass="form-label"/>
+                        <DatePicker fx:id="datePickerDate" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="4">
+                        <Label text="Heure" styleClass="form-label"/>
+                        <TextField fx:id="champHeure" promptText="HH:mm" prefWidth="90"/>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <VBox HBox.hgrow="ALWAYS" spacing="4">
+                        <Label text="Quantité *" styleClass="form-label"/>
+                        <TextField fx:id="champQuantite" promptText="Ex: 45.2" styleClass="form-field"/>
+                    </VBox>
+                    <Label fx:id="labelUnite" text="kWh" styleClass="unit-label"/>
+                </HBox>
+
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <CheckBox fx:id="checkCoutAuto" text="Coût automatique" selected="true"/>
+                </HBox>
+
+                <Label text="Coût estimé (€)" styleClass="form-label"/>
+                <TextField fx:id="champCoutManuel" promptText="Calculé auto."
+                           disable="true" styleClass="form-field"/>
+
+                <Label text="Note (optionnel)" styleClass="form-label"/>
+                <TextArea fx:id="champNote" promptText="Remarque, contexte..."
+                          prefHeight="60" styleClass="form-field"/>
+
+                <HBox spacing="8">
+                    <Button text="💾 Enregistrer" styleClass="btn-primary"
+                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            onAction="#enregistrerConsommation"/>
+                    <Button text="↩" styleClass="btn-outline" onAction="#effacerFormulaire"/>
+                </HBox>
+            </VBox>
+
+            <!-- Import CSV -->
+            <VBox styleClass="card" spacing="12">
+                <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+                <Label text="📂 Import et génération" styleClass="card-title"/>
+
+                <Button text="📁 Importer un fichier CSV" styleClass="btn-secondary"
+                        maxWidth="Infinity" onAction="#importerCSV"/>
+
+                <Separator/>
+
+                <Label text="Générer des données de test :" styleClass="form-label"/>
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <Label text="Jours :"/>
+                    <Spinner fx:id="spinnerNombreJours" prefWidth="80"/>
+                    <Label text="Mesures/jour :"/>
+                    <Spinner fx:id="spinnerMesuresParJour" prefWidth="80"/>
+                </HBox>
+                <Button text="🎲 Générer les données" styleClass="btn-secondary"
+                        maxWidth="Infinity" onAction="#genererDonneesTest"/>
+            </VBox>
+        </VBox>
+
+        <!-- COLONNE DROITE : Tableau des enregistrements -->
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label text="📋 Enregistrements de consommation" styleClass="section-title"/>
+
+            <TableView fx:id="tableViewRecords" VBox.vgrow="ALWAYS" styleClass="data-table">
+                <columns>
+                    <TableColumn fx:id="colRecordId" text="ID" prefWidth="50"/>
+                    <TableColumn fx:id="colRecordDate" text="Date/Heure" prefWidth="160"/>
+                    <TableColumn fx:id="colRecordType" text="Énergie" prefWidth="120"/>
+                    <TableColumn fx:id="colRecordQuantite" text="Quantité" prefWidth="100"/>
+                    <TableColumn fx:id="colRecordCout" text="Coût (€)" prefWidth="100"/>
+                    <TableColumn fx:id="colRecordSource" text="Source" prefWidth="90"/>
+                </columns>
+                <placeholder>
+                    <Label text="Aucune consommation enregistrée pour ce bâtiment."
+                           styleClass="table-placeholder"/>
+                </placeholder>
+            </TableView>
+
+            <HBox spacing="8">
+                <Button text="🗑 Supprimer la sélection" styleClass="btn-danger"
+                        onAction="#supprimerRecord"/>
+            </HBox>
+        </VBox>
+    </HBox>
+</VBox>

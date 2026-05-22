@@ -1,0 +1,30 @@
+# Build artifacts
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Database and data
+data/
+*.db
+*.sqlite
+
+# IDEs and Editors
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

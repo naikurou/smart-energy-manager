@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<!-- Vue d'analyse : affiche les pics, anomalies et indicateurs par bâtiment -->
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.smartenergy.controller.AnalyseController"
+            fitToWidth="true" styleClass="scroll-pane">
+
+    <VBox spacing="20" styleClass="page-container">
+        <padding><Insets top="24" bottom="24" left="24" right="24"/></padding>
+
+        <!-- EN-TÊTE -->
+        <HBox alignment="CENTER_LEFT" spacing="16">
+            <Label text="🔍 Analyse avancée" styleClass="page-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <ComboBox fx:id="comboBatimentAnalyse" promptText="Sélectionner un bâtiment"
+                      prefWidth="250"/>
+            <Button text="🔄 Analyser" onAction="#lancerAnalyse" styleClass="btn-primary"/>
+        </HBox>
+
+        <!-- INDICATEURS D'ANALYSE -->
+        <HBox spacing="16">
+            <VBox styleClass="kpi-card, kpi-purple" HBox.hgrow="ALWAYS">
+                <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+                <Label text="🔥 ÉNERGIE DOMINANTE" styleClass="kpi-label"/>
+                <Label fx:id="labelAnalyseEnergieDom" text="—" styleClass="kpi-value"/>
+                <Label text="Sur l'ensemble de l'historique" styleClass="kpi-subtitle"/>
+            </VBox>
+            <VBox styleClass="kpi-card, kpi-orange" HBox.hgrow="ALWAYS">
+                <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+                <Label text="📈 TENDANCE 30J" styleClass="kpi-label"/>
+                <Label fx:id="labelAnalyseTendance" text="—" styleClass="kpi-value"/>
+                <Label text="vs 30 jours précédents" styleClass="kpi-subtitle"/>
+            </VBox>
+            <VBox styleClass="kpi-card, kpi-green" HBox.hgrow="ALWAYS">
+                <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+                <Label text="💰 FACTURE ESTIMÉE" styleClass="kpi-label"/>
+                <Label fx:id="labelAnalyseFacture" text="—" styleClass="kpi-value"/>
+                <Label text="Basée sur 30 derniers jours" styleClass="kpi-subtitle"/>
+            </VBox>
+        </HBox>
+
+        <!-- PICS DE CONSOMMATION -->
+        <VBox styleClass="card" spacing="12">
+            <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+            <Label text="⚡ Pics de consommation détectés" styleClass="card-title"/>
+            <TableView fx:id="tablePics" prefHeight="200" styleClass="data-table">
+                <columns>
+                    <TableColumn fx:id="colPicDate" text="Date/Heure" prefWidth="160"/>
+                    <TableColumn fx:id="colPicType" text="Énergie" prefWidth="120"/>
+                    <TableColumn fx:id="colPicQuantite" text="Quantité" prefWidth="120"/>
+                    <TableColumn fx:id="colPicCout" text="Coût (€)" prefWidth="100"/>
+                </columns>
+                <placeholder>
+                    <Label text="Aucun pic détecté — consommation stable ✓"
+                           styleClass="table-placeholder"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+
+        <!-- ANOMALIES DETECTEES -->
+        <VBox styleClass="card" spacing="12">
+            <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+            <Label text="🚨 Anomalies détectées" styleClass="card-title"/>
+            <ListView fx:id="listAnomalies" prefHeight="150" styleClass="alerts-list"/>
+        </VBox>
+
+        <!-- RÉSUMÉ PAR TYPE D'ÉNERGIE -->
+        <VBox styleClass="card" spacing="12">
+            <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+            <Label text="📊 Résumé par type d'énergie" styleClass="card-title"/>
+            <TableView fx:id="tableResume" prefHeight="180" styleClass="data-table">
+                <columns>
+                    <TableColumn fx:id="colResumeType" text="Type" prefWidth="150"/>
+                    <TableColumn fx:id="colResumeTotal" text="Total" prefWidth="120"/>
+                    <TableColumn fx:id="colResumeCout" text="Coût total" prefWidth="120"/>
+                    <TableColumn fx:id="colResumePart" text="Part (%)" prefWidth="100"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </VBox>
+</ScrollPane>

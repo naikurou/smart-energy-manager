@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.smartenergy.controller.BatimentsController"
+      spacing="16" styleClass="page-container">
+
+    <padding><Insets top="24" bottom="24" left="24" right="24"/></padding>
+
+    <!-- ===== EN-TÊTE ===== -->
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label text="🏢 Gestion des Bâtiments" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="labelStatut" text="" styleClass="statut-label"/>
+    </HBox>
+
+    <!-- ===== BARRE DE RECHERCHE ===== -->
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Label text="🔍"/>
+        <TextField fx:id="champRecherche" promptText="Rechercher par nom ou adresse..."
+                   HBox.hgrow="ALWAYS" styleClass="search-field"/>
+        <Label text="Filtrer :"/>
+        <ComboBox fx:id="comboFiltreType" prefWidth="200"/>
+    </HBox>
+
+    <!-- ===== CONTENU PRINCIPAL : TABLE + FORMULAIRE ===== -->
+    <HBox spacing="16" VBox.vgrow="ALWAYS">
+
+        <!-- TABLEAU DES BATIMENTS (gauche) -->
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <TableView fx:id="tableViewBatiments" VBox.vgrow="ALWAYS" styleClass="data-table">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+                    <TableColumn fx:id="colNom" text="Nom" prefWidth="180"/>
+                    <TableColumn fx:id="colType" text="Type" prefWidth="150"/>
+                    <TableColumn fx:id="colAdresse" text="Adresse" prefWidth="200"/>
+                    <TableColumn fx:id="colSuperficie" text="Superficie" prefWidth="100"/>
+                    <TableColumn fx:id="colOccupants" text="Occupants" prefWidth="90"/>
+                </columns>
+                <placeholder>
+                    <Label text="Aucun bâtiment enregistré. Créez-en un !" styleClass="table-placeholder"/>
+                </placeholder>
+            </TableView>
+
+            <!-- Boutons d'action sur la table -->
+            <HBox spacing="8">
+                <Button fx:id="btnSupprimer" text="🗑 Supprimer"
+                        styleClass="btn-danger" onAction="#supprimerBatiment" disable="true"/>
+                <Button fx:id="btnCloner" text="📋 Cloner"
+                        styleClass="btn-secondary" onAction="#clonerBatiment" disable="true"/>
+            </HBox>
+        </VBox>
+
+        <!-- FORMULAIRE (droite) -->
+        <VBox spacing="12" prefWidth="320" styleClass="card">
+            <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+            <Label text="📝 Détails du bâtiment" styleClass="card-title"/>
+
+            <Label text="Nom *" styleClass="form-label"/>
+            <TextField fx:id="champNom" promptText="Ex: Résidence du Parc" styleClass="form-field"/>
+
+            <Label text="Adresse" styleClass="form-label"/>
+            <TextField fx:id="champAdresse" promptText="Ex: 12 Rue de la Paix, Paris" styleClass="form-field"/>
+
+            <Label text="Type de bâtiment *" styleClass="form-label"/>
+            <ComboBox fx:id="comboType" maxWidth="Infinity"/>
+
+            <HBox spacing="8">
+                <VBox HBox.hgrow="ALWAYS" spacing="4">
+                    <Label text="Superficie (m²)" styleClass="form-label"/>
+                    <TextField fx:id="champSuperficie" promptText="Ex: 120.5" styleClass="form-field"/>
+                </VBox>
+                <VBox HBox.hgrow="ALWAYS" spacing="4">
+                    <Label text="Occupants" styleClass="form-label"/>
+                    <TextField fx:id="champOccupants" promptText="Ex: 4" styleClass="form-field"/>
+                </VBox>
+            </HBox>
+
+            <Label text="Année de construction" styleClass="form-label"/>
+            <TextField fx:id="champAnnee" promptText="Ex: 2005" styleClass="form-field"/>
+
+            <Label text="Description / Notes" styleClass="form-label"/>
+            <TextArea fx:id="champDescription" promptText="Informations complémentaires..."
+                      prefHeight="80" styleClass="form-field"/>
+
+            <!-- Boutons du formulaire -->
+            <VBox spacing="8">
+                <Button fx:id="btnCreer" text="✅ Créer" styleClass="btn-primary"
+                        maxWidth="Infinity" onAction="#creerBatiment"/>
+                <Button fx:id="btnModifier" text="✏ Modifier" styleClass="btn-secondary"
+                        maxWidth="Infinity" onAction="#modifierBatiment" disable="true"/>
+                <Button fx:id="btnEffacer" text="↩ Effacer" styleClass="btn-outline"
+                        maxWidth="Infinity" onAction="#effacerFormulaire"/>
+            </VBox>
+
+        </VBox>
+    </HBox>
+</VBox>

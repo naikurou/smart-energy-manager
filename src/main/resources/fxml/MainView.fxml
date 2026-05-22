@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.smartenergy.controller.MainController"
+            prefWidth="1280" prefHeight="800"
+            styleClass="main-container">
+
+    <!-- ===== BARRE LATERALE DE NAVIGATION ===== -->
+    <left>
+        <VBox styleClass="sidebar" prefWidth="220" spacing="0">
+
+            <!-- En-tête de l'application -->
+            <VBox styleClass="sidebar-header" alignment="CENTER" spacing="8">
+                <padding><Insets top="30" bottom="30" left="16" right="16"/></padding>
+                <Label text="⚡" styleClass="logo-icon"/>
+                <Label text="Smart Energy" styleClass="logo-title"/>
+                <Label text="Manager" styleClass="logo-subtitle"/>
+            </VBox>
+
+            <!-- Boutons de navigation -->
+            <VBox styleClass="nav-menu" spacing="4">
+                <padding><Insets top="16" left="12" right="12" bottom="16"/></padding>
+
+                <Button fx:id="btnDashboard" text="🏠  Tableau de bord"
+                        styleClass="nav-btn, nav-btn-actif"
+                        maxWidth="Infinity"
+                        onAction="#naviguerVersDashboard"/>
+
+                <Button fx:id="btnBatiments" text="🏢  Bâtiments"
+                        styleClass="nav-btn"
+                        maxWidth="Infinity"
+                        onAction="#naviguerVersBatiments"/>
+
+                <Button fx:id="btnConsommations" text="📊  Consommations"
+                        styleClass="nav-btn"
+                        maxWidth="Infinity"
+                        onAction="#naviguerVersConsommations"/>
+
+                <Button fx:id="btnGraphiques" text="📈  Graphiques"
+                        styleClass="nav-btn"
+                        maxWidth="Infinity"
+                        onAction="#naviguerVersGraphiques"/>
+
+                <Button fx:id="btnAnalyse" text="🔍  Analyse"
+                        styleClass="nav-btn"
+                        maxWidth="Infinity"
+                        onAction="#naviguerVersAnalyse"/>
+            </VBox>
+
+            <!-- Espacement flexible -->
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <!-- Pied de page de la barre latérale -->
+            <VBox styleClass="sidebar-footer" alignment="CENTER">
+                <padding><Insets top="16" bottom="20" left="16" right="16"/></padding>
+                <Label text="v1.0.0 — © 2024" styleClass="version-label"/>
+                <Label text="Smart Energy Manager" styleClass="footer-label"/>
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- ===== ZONE DE CONTENU CENTRAL ===== -->
+    <!-- Le contenu est chargé dynamiquement par MainController -->
+    <center>
+        <StackPane fx:id="conteneurCentral" styleClass="content-area">
+            <!-- Vue par défaut : chargée automatiquement au démarrage -->
+            <Label text="Chargement..." styleClass="loading-label"/>
+        </StackPane>
+    </center>
+
+</BorderPane>

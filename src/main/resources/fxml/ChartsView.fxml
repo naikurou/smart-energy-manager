@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.smartenergy.controller.ChartsController"
+      spacing="16" styleClass="page-container">
+
+    <padding><Insets top="24" bottom="24" left="24" right="24"/></padding>
+
+    <!-- ===== EN-TÊTE ET FILTRES ===== -->
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label text="📈 Graphiques et Visualisations" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <ComboBox fx:id="comboBatiment" promptText="Sélectionner un bâtiment" prefWidth="220"/>
+        <ComboBox fx:id="comboPeriode" prefWidth="180"/>
+        <Button text="🔄 Actualiser" onAction="#actualiserGraphiques" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- ===== TABS DES GRAPHIQUES ===== -->
+    <TabPane VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE" styleClass="charts-tabs">
+
+        <!-- TAB 1 : COURBE TEMPORELLE -->
+        <Tab text="📉 Évolution temporelle">
+            <VBox spacing="12">
+                <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+
+                <LineChart fx:id="lineChartTemporel"
+                           title="Évolution de la consommation"
+                           prefHeight="400"
+                           styleClass="chart-main"
+                           animated="false">
+                    <xAxis>
+                        <CategoryAxis label="Date"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis label="Quantité"/>
+                    </yAxis>
+                </LineChart>
+            </VBox>
+        </Tab>
+
+        <!-- TAB 2 : HISTOGRAMME PAR ÉNERGIE -->
+        <Tab text="📊 Par type d'énergie">
+            <VBox spacing="12">
+                <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+
+                <BarChart fx:id="barChartParEnergie"
+                          title="Consommation par type d'énergie"
+                          prefHeight="400"
+                          styleClass="chart-main"
+                          animated="false">
+                    <xAxis>
+                        <CategoryAxis label="Type d'énergie"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis label="Valeur"/>
+                    </yAxis>
+                </BarChart>
+            </VBox>
+        </Tab>
+
+        <!-- TAB 3 : CAMEMBERT RÉPARTITION -->
+        <Tab text="🥧 Répartition des coûts">
+            <VBox spacing="12">
+                <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+
+                <PieChart fx:id="pieChartRepartition"
+                          title="Répartition des coûts par énergie"
+                          prefHeight="450"
+                          animated="false"
+                          labelsVisible="true"/>
+            </VBox>
+        </Tab>
+
+        <!-- TAB 4 : COMPARAISON MULTI-BATIMENTS -->
+        <Tab text="🏢 Comparaison bâtiments">
+            <VBox spacing="12">
+                <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+
+                <BarChart fx:id="barChartComparaison"
+                          title="Comparaison multi-bâtiments"
+                          prefHeight="400"
+                          styleClass="chart-main"
+                          animated="false">
+                    <xAxis>
+                        <CategoryAxis label="Bâtiment"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis label="Quantité consommée"/>
+                    </yAxis>
+                </BarChart>
+            </VBox>
+        </Tab>
+
+        <!-- TAB 5 : ANALYSE TEXTUELLE -->
+        <Tab text="🔍 Analyse">
+            <ScrollPane fitToWidth="true">
+                <VBox spacing="16">
+                    <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+
+                    <Label text="Analyse du bâtiment sélectionné" styleClass="card-title"/>
+
+                    <HBox spacing="16">
+                        <VBox styleClass="kpi-card, kpi-blue" HBox.hgrow="ALWAYS">
+                            <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+                            <Label text="⚡ ÉNERGIE DOMINANTE" styleClass="kpi-label"/>
+                            <Label fx:id="labelEnergieDominante" text="—" styleClass="kpi-value"/>
+                        </VBox>
+
+                        <VBox styleClass="kpi-card, kpi-orange" HBox.hgrow="ALWAYS">
+                            <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+                            <Label text="📈 TENDANCE" styleClass="kpi-label"/>
+                            <Label fx:id="labelTendance" text="—" styleClass="kpi-value"/>
+                        </VBox>
+
+                        <VBox styleClass="kpi-card, kpi-green" HBox.hgrow="ALWAYS">
+                            <padding><Insets top="16" bottom="16" left="16" right="16"/></padding>
+                            <Label text="💰 ESTIMATION MENSUELLE" styleClass="kpi-label"/>
+                            <Label fx:id="labelEstimationFacture" text="—" styleClass="kpi-value"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </ScrollPane>
+        </Tab>
+    </TabPane>
+</VBox>
