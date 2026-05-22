@@ -6,6 +6,7 @@
 <?import javafx.geometry.Insets?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="borderPaneMain"
             fx:controller="com.smartenergy.controller.MainController"
             prefWidth="1280" prefHeight="800"
             styleClass="main-container">
