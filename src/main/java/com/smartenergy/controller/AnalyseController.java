@@ -20,31 +20,22 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Contrôleur pour la vue d'analyse avancée.
- * Affiche les pics de consommation, les anomalies détectées,
- * les indicateurs analytiques et le résumé par type d'énergie.
- */
 public class AnalyseController implements Initializable {
 
     @FXML private ComboBox<Batiment> comboBatimentAnalyse;
 
-    // KPI labels
     @FXML private Label labelAnalyseEnergieDom;
     @FXML private Label labelAnalyseTendance;
     @FXML private Label labelAnalyseFacture;
 
-    // Table des pics
     @FXML private TableView<EnergyRecord> tablePics;
     @FXML private TableColumn<EnergyRecord, String> colPicDate;
     @FXML private TableColumn<EnergyRecord, String> colPicType;
     @FXML private TableColumn<EnergyRecord, Double> colPicQuantite;
     @FXML private TableColumn<EnergyRecord, Double> colPicCout;
 
-    // Liste des anomalies
     @FXML private ListView<String> listAnomalies;
 
-    // Table résumé par énergie
     @FXML private TableView<Map<String, Object>> tableResume;
     @FXML private TableColumn<Map<String, Object>, String> colResumeType;
     @FXML private TableColumn<Map<String, Object>, Double> colResumeTotal;
@@ -62,11 +53,7 @@ public class AnalyseController implements Initializable {
         chargerBatiments();
     }
 
-    /**
-     * Configure les colonnes des tableaux d'analyse.
-     */
     private void configurerColonnes() {
-        // Colonnes de la table des pics
         colPicDate.setCellValueFactory(data -> new SimpleStringProperty(
             data.getValue().getDateHeure() != null
                 ? data.getValue().getDateHeure().format(FMT) : "—"));
@@ -76,7 +63,7 @@ public class AnalyseController implements Initializable {
         colPicQuantite.setCellValueFactory(new PropertyValueFactory<>("quantite"));
         colPicCout.setCellValueFactory(new PropertyValueFactory<>("coutEstime"));
 
-        // Colonnes du résumé par énergie
+        // Résumé par énergie : on utilise une Map comme modèle (pas de vrai POJO)
         colResumeType.setCellValueFactory(data ->
             new SimpleStringProperty((String) data.getValue().get("type")));
         colResumeTotal.setCellValueFactory(data ->
@@ -86,7 +73,6 @@ public class AnalyseController implements Initializable {
         colResumePart.setCellValueFactory(data ->
             new SimpleDoubleProperty((Double) data.getValue().get("part")).asObject());
 
-        // Formatage de la colonne part (%)
         colResumePart.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(Double item, boolean empty) {
@@ -96,9 +82,6 @@ public class AnalyseController implements Initializable {
         });
     }
 
-    /**
-     * Charge la liste des bâtiments dans la ComboBox.
-     */
     private void chargerBatiments() {
         List<Batiment> batiments = batimentService.trouverTous();
         comboBatimentAnalyse.setItems(FXCollections.observableArrayList(batiments));
@@ -107,61 +90,38 @@ public class AnalyseController implements Initializable {
         }
     }
 
-    /**
-     * Lance l'analyse complète pour le bâtiment sélectionné.
-     */
     @FXML
     public void lancerAnalyse() {
         Batiment batiment = comboBatimentAnalyse.getValue();
         if (batiment == null) return;
-
         afficherKPI(batiment);
         afficherPics(batiment);
         afficherAnomalies(batiment);
         afficherResumeEnergie(batiment);
     }
 
-    /**
-     * Affiche les indicateurs clés d'analyse.
-     *
-     * @param batiment Le bâtiment analysé
-     */
     private void afficherKPI(Batiment batiment) {
-        // Énergie dominante
         TypeEnergie dominante = energyService.getEnergieDominante(batiment.getId());
         labelAnalyseEnergieDom.setText(dominante != null ? dominante.getLibelle() : "Aucune donnée");
 
-        // Tendance
         double tendance = energyService.calculerTendance(batiment.getId());
         String symbole = tendance >= 0 ? "▲ +" : "▼ ";
         labelAnalyseTendance.setText(symbole + df.format(Math.abs(tendance)) + "%");
         labelAnalyseTendance.setStyle(tendance > 10
             ? "-fx-text-fill: #f44336;" : "-fx-text-fill: #4caf50;");
 
-        // Facture estimée
         double facture = energyService.estimerFactureMensuelle(batiment.getId());
         labelAnalyseFacture.setText(df.format(facture) + " €");
     }
 
-    /**
-     * Affiche les pics de consommation dans le tableau dédié.
-     *
-     * @param batiment Le bâtiment analysé
-     */
     private void afficherPics(Batiment batiment) {
         List<EnergyRecord> pics = energyService.detecterPics(batiment.getId());
         tablePics.setItems(FXCollections.observableArrayList(pics));
     }
 
-    /**
-     * Affiche les anomalies détectées dans la ListView.
-     *
-     * @param batiment Le bâtiment analysé
-     */
     private void afficherAnomalies(Batiment batiment) {
         listAnomalies.getItems().clear();
         List<Alerte> anomalies = energyService.detecterAnomalies(List.of(batiment));
-
         if (anomalies.isEmpty()) {
             listAnomalies.getItems().add("✓ Aucune anomalie détectée — consommation stable.");
         } else {
@@ -169,15 +129,10 @@ public class AnalyseController implements Initializable {
         }
     }
 
-    /**
-     * Affiche le résumé de consommation par type d'énergie dans le tableau.
-     *
-     * @param batiment Le bâtiment analysé
-     */
+    // Résumé : pour chaque type d'énergie, on calcule total + coût + part en %
     private void afficherResumeEnergie(Batiment batiment) {
         List<EnergyRecord> records = energyService.getRecordsBatiment(batiment.getId());
 
-        // Totaux par énergie
         Map<TypeEnergie, Double> totauxQte = records.stream()
             .collect(Collectors.groupingBy(EnergyRecord::getTypeEnergie,
                 Collectors.summingDouble(EnergyRecord::getQuantite)));

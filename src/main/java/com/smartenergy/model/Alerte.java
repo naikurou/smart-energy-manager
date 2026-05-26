@@ -1,48 +1,21 @@
 package com.smartenergy.model;
 
-/**
- * Classe représentant une alerte de consommation énergétique.
- * Une alerte est générée automatiquement lorsqu'une consommation
- * dépasse un seuil défini (pic de consommation, anomalie détectée, etc.).
- */
 public class Alerte {
 
-    /** Identifiant unique de l'alerte */
     private int id;
 
-    /** Niveau de sévérité de l'alerte */
+    // Niveaux de sévérité pour classifier les alertes
     public enum NiveauAlerte {
         INFO, AVERTISSEMENT, CRITIQUE
     }
 
-    /** Message descriptif de l'alerte */
     private String message;
-
-    /** Bâtiment concerné par l'alerte */
     private Batiment batiment;
-
-    /** Type d'énergie concerné (peut être null si l'alerte est globale) */
     private TypeEnergie typeEnergie;
-
-    /** Niveau de sévérité */
     private NiveauAlerte niveau;
-
-    /** Valeur qui a déclenché l'alerte */
     private double valeurDetectee;
-
-    /** Seuil qui a été dépassé */
     private double seuil;
 
-    /**
-     * Constructeur complet d'une alerte.
-     *
-     * @param message        Le message descriptif
-     * @param batiment       Le bâtiment concerné
-     * @param typeEnergie    Le type d'énergie (ou null)
-     * @param niveau         Le niveau de sévérité
-     * @param valeurDetectee La valeur anormale détectée
-     * @param seuil          Le seuil dépassé
-     */
     public Alerte(String message, Batiment batiment, TypeEnergie typeEnergie,
                   NiveauAlerte niveau, double valeurDetectee, double seuil) {
         this.message = message;
@@ -52,8 +25,6 @@ public class Alerte {
         this.valeurDetectee = valeurDetectee;
         this.seuil = seuil;
     }
-
-    // ======================== GETTERS ET SETTERS ========================
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

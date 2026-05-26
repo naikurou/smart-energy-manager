@@ -11,36 +11,15 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Utilitaire pour l'import et l'export de données de consommation au format CSV.
- *
- * <p>Format CSV attendu pour l'import (séparateur : virgule) :
- * <pre>batiment_id,date_heure,type_energie,quantite,note</pre>
- * Exemple :
- * <pre>1,2024-03-15 08:30:00,ELECTRICITE,45.2,Mesure matinale</pre>
- * </p>
- *
- * <p>Le coût estimé est calculé automatiquement depuis le type d'énergie.</p>
- */
+// Format CSV : batiment_id,date_heure,type_energie,quantite,note
 public class CsvParser {
 
-    /** En-tête du fichier CSV d'export */
     private static final String ENTETE_CSV =
         "batiment_id,date_heure,type_energie,quantite,cout_estime,source,note";
 
-    /** Format de date attendu dans le CSV */
     private static final DateTimeFormatter FORMATTER =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    /**
-     * Importe des enregistrements depuis un fichier CSV.
-     *
-     * <p>Les lignes mal formatées ou avec des valeurs invalides sont ignorées
-     * et un message d'erreur est affiché pour chacune.</p>
-     *
-     * @param fichier Le fichier CSV à importer
-     * @return La liste des enregistrements valides extraits du fichier
-     */
     public static List<EnergyRecord> importer(File fichier) {
         List<EnergyRecord> records = new ArrayList<>();
         int numLigne = 0;
@@ -53,7 +32,6 @@ public class CsvParser {
             while ((ligne = reader.readLine()) != null) {
                 numLigne++;
 
-                // Ignorer la ligne d'en-tête et les lignes vides
                 if (numLigne == 1 || ligne.isBlank() || ligne.startsWith("#")) {
                     continue;
                 }
@@ -80,22 +58,13 @@ public class CsvParser {
         return records;
     }
 
-    /**
-     * Exporte une liste d'enregistrements vers un fichier CSV.
-     *
-     * @param records   La liste des enregistrements à exporter
-     * @param fichier   Le fichier de destination
-     * @return true si l'export a réussi
-     */
     public static boolean exporter(List<EnergyRecord> records, File fichier) {
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(fichier), StandardCharsets.UTF_8))) {
 
-            // Écriture de l'en-tête
             writer.write(ENTETE_CSV);
             writer.newLine();
 
-            // Écriture de chaque enregistrement
             for (EnergyRecord record : records) {
                 writer.write(String.format("%d,%s,%s,%.4f,%.2f,%s,%s",
                     record.getBatimentId(),
@@ -118,15 +87,7 @@ public class CsvParser {
         }
     }
 
-    /**
-     * Parse une ligne CSV en objet EnergyRecord.
-     * Format attendu : batiment_id,date_heure,type_energie,quantite[,note]
-     *
-     * @param ligne    La ligne CSV à parser
-     * @param numLigne Le numéro de la ligne pour les messages d'erreur
-     * @return L'EnergyRecord correspondant
-     * @throws IllegalArgumentException si le format est invalide
-     */
+    // Parse une ligne CSV → EnergyRecord (le coût est calculé auto depuis le type)
     private static EnergyRecord parseLigne(String ligne, int numLigne) {
         String[] parties = ligne.split(",", -1);
 
@@ -151,7 +112,6 @@ public class CsvParser {
             EnergyRecord record = new EnergyRecord(batimentId, dateHeure, typeEnergie,
                 quantite, "CSV");
 
-            // Note optionnelle (5ème colonne)
             if (parties.length >= 5 && !parties[4].isBlank()) {
                 record.setNote(parties[4].trim());
             }

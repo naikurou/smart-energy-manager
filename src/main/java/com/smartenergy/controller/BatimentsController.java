@@ -15,17 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-/**
- * Contrôleur pour la gestion CRUD complète des bâtiments.
- * Gère l'affichage en tableau, la sélection, la création, la modification,
- * la suppression et la duplication des bâtiments.
- *
- * <p>Ce contrôleur utilise un TableView JavaFX avec des colonnes liées
- * aux propriétés du modèle Batiment via les PropertyValueFactory.</p>
- */
 public class BatimentsController implements Initializable {
 
-    // ===== TableView et colonnes =====
     @FXML private TableView<Batiment> tableViewBatiments;
     @FXML private TableColumn<Batiment, Integer> colId;
     @FXML private TableColumn<Batiment, String> colNom;
@@ -34,7 +25,6 @@ public class BatimentsController implements Initializable {
     @FXML private TableColumn<Batiment, Double> colSuperficie;
     @FXML private TableColumn<Batiment, Integer> colOccupants;
 
-    // ===== Formulaire de saisie =====
     @FXML private TextField champNom;
     @FXML private TextField champAdresse;
     @FXML private ComboBox<TypeBatiment> comboType;
@@ -43,33 +33,21 @@ public class BatimentsController implements Initializable {
     @FXML private TextField champAnnee;
     @FXML private TextArea champDescription;
 
-    // ===== Boutons d'action =====
     @FXML private Button btnCreer;
     @FXML private Button btnModifier;
     @FXML private Button btnSupprimer;
     @FXML private Button btnCloner;
     @FXML private Button btnEffacer;
 
-    // ===== Filtre de recherche =====
     @FXML private TextField champRecherche;
     @FXML private ComboBox<String> comboFiltreType;
 
-    // ===== Label de statut =====
     @FXML private Label labelStatut;
 
-    /** Service métier pour les bâtiments */
     private final BatimentService batimentService = new BatimentService();
-
-    /** Liste observable pour le TableView */
     private ObservableList<Batiment> listeBatiments;
-
-    /** Bâtiment actuellement sélectionné dans la table */
     private Batiment batimentSelectionne;
 
-    /**
-     * Initialisation de la vue après chargement du FXML.
-     * Configure les colonnes, les ComboBox et charge les données.
-     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         configurerColonnes();
@@ -80,9 +58,6 @@ public class BatimentsController implements Initializable {
         desactiverBoutons(true);
     }
 
-    /**
-     * Configure les colonnes du TableView en liant les propriétés du modèle.
-     */
     private void configurerColonnes() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNom.setCellValueFactory(new PropertyValueFactory<>("nom"));
@@ -91,7 +66,6 @@ public class BatimentsController implements Initializable {
         colSuperficie.setCellValueFactory(new PropertyValueFactory<>("superficie"));
         colOccupants.setCellValueFactory(new PropertyValueFactory<>("nombreOccupants"));
 
-        // Formater la superficie avec 2 décimales
         colSuperficie.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(Double item, boolean empty) {
@@ -101,9 +75,6 @@ public class BatimentsController implements Initializable {
         });
     }
 
-    /**
-     * Remplit les ComboBox de type de bâtiment.
-     */
     private void configurerComboTypes() {
         comboType.setItems(FXCollections.observableArrayList(TypeBatiment.values()));
         comboType.getSelectionModel().selectFirst();
@@ -119,9 +90,7 @@ public class BatimentsController implements Initializable {
         comboFiltreType.getSelectionModel().selectFirst();
     }
 
-    /**
-     * Configure la sélection dans le tableau pour remplir le formulaire.
-     */
+    // Quand on clique sur une ligne, on pré-remplit le formulaire
     private void configurerSelectionTable() {
         tableViewBatiments.getSelectionModel().selectedItemProperty()
             .addListener((obs, ancien, nouveau) -> {
@@ -136,17 +105,12 @@ public class BatimentsController implements Initializable {
             });
     }
 
-    /**
-     * Configure le filtre de recherche en temps réel.
-     */
+    // Filtre en temps réel sur le nom/adresse + type
     private void configurerRecherche() {
         champRecherche.textProperty().addListener((obs, ancien, nouveau) -> filtrerBatiments());
         comboFiltreType.setOnAction(e -> filtrerBatiments());
     }
 
-    /**
-     * Charge tous les bâtiments depuis le service et actualise le tableau.
-     */
     private void chargerBatiments() {
         List<Batiment> batiments = batimentService.trouverTous();
         listeBatiments = FXCollections.observableArrayList(batiments);
@@ -154,9 +118,6 @@ public class BatimentsController implements Initializable {
         afficherStatut("✓ " + batiments.size() + " bâtiment(s) chargé(s).");
     }
 
-    /**
-     * Filtre les bâtiments selon la recherche et le type sélectionné.
-     */
     private void filtrerBatiments() {
         String recherche = champRecherche.getText().toLowerCase().trim();
         String typeFiltré = comboFiltreType.getValue();
@@ -176,9 +137,6 @@ public class BatimentsController implements Initializable {
         tableViewBatiments.setItems(listeBatiments);
     }
 
-    /**
-     * Crée un nouveau bâtiment à partir des données du formulaire.
-     */
     @FXML
     private void creerBatiment() {
         try {
@@ -193,17 +151,12 @@ public class BatimentsController implements Initializable {
         }
     }
 
-    /**
-     * Modifie le bâtiment sélectionné avec les nouvelles données du formulaire.
-     */
     @FXML
     private void modifierBatiment() {
         if (batimentSelectionne == null) return;
-
         try {
             Batiment modifie = lireFormulaire();
             modifie.setId(batimentSelectionne.getId());
-
             if (batimentService.mettreAJour(modifie)) {
                 chargerBatiments();
                 afficherStatut("✓ Bâtiment '" + modifie.getNom() + "' mis à jour.");
@@ -213,14 +166,11 @@ public class BatimentsController implements Initializable {
         }
     }
 
-    /**
-     * Supprime le bâtiment sélectionné après confirmation.
-     */
+    // Confirmation avant suppression car ça supprime aussi les consommations liées
     @FXML
     private void supprimerBatiment() {
         if (batimentSelectionne == null) return;
 
-        // Demande de confirmation avant suppression
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Confirmer la suppression");
         confirmation.setHeaderText("Supprimer le bâtiment : " + batimentSelectionne.getNom());
@@ -240,14 +190,10 @@ public class BatimentsController implements Initializable {
         }
     }
 
-    /**
-     * Clone le bâtiment sélectionné en demandant un nouveau nom.
-     */
     @FXML
     private void clonerBatiment() {
         if (batimentSelectionne == null) return;
 
-        // Boîte de dialogue pour le nom du clone
         TextInputDialog dialog = new TextInputDialog("Copie de " + batimentSelectionne.getNom());
         dialog.setTitle("Cloner le bâtiment");
         dialog.setHeaderText("Dupliquer : " + batimentSelectionne.getNom());
@@ -267,9 +213,6 @@ public class BatimentsController implements Initializable {
         });
     }
 
-    /**
-     * Efface le formulaire et désélectionne le tableau.
-     */
     @FXML
     private void effacerFormulaire() {
         champNom.clear();
@@ -284,11 +227,6 @@ public class BatimentsController implements Initializable {
         desactiverBoutons(true);
     }
 
-    /**
-     * Remplit le formulaire avec les données du bâtiment sélectionné.
-     *
-     * @param batiment Le bâtiment dont les données sont à afficher
-     */
     private void remplirFormulaire(Batiment batiment) {
         champNom.setText(batiment.getNom());
         champAdresse.setText(batiment.getAdresse() != null ? batiment.getAdresse() : "");
@@ -299,13 +237,7 @@ public class BatimentsController implements Initializable {
         champDescription.setText(batiment.getDescription() != null ? batiment.getDescription() : "");
     }
 
-    /**
-     * Lit les données du formulaire et crée un objet Batiment.
-     * Lance une exception si les champs obligatoires sont manquants ou invalides.
-     *
-     * @return Le Batiment construit à partir du formulaire
-     * @throws IllegalArgumentException si les données sont invalides
-     */
+    // Validation des champs obligatoires + parsing des valeurs numériques
     private Batiment lireFormulaire() {
         String nom = champNom.getText().trim();
         if (nom.isBlank()) throw new IllegalArgumentException("Le nom est obligatoire.");
@@ -341,32 +273,17 @@ public class BatimentsController implements Initializable {
             superficie, occupants, annee, champDescription.getText().trim());
     }
 
-    /**
-     * Active ou désactive les boutons d'action selon la sélection.
-     *
-     * @param desactiver true pour désactiver Modifier/Supprimer/Cloner
-     */
     private void desactiverBoutons(boolean desactiver) {
         btnModifier.setDisable(desactiver);
         btnSupprimer.setDisable(desactiver);
         btnCloner.setDisable(desactiver);
     }
 
-    /**
-     * Affiche un message de statut vert.
-     *
-     * @param message Le message à afficher
-     */
     private void afficherStatut(String message) {
         labelStatut.setText(message);
         labelStatut.setStyle("-fx-text-fill: #4caf50;");
     }
 
-    /**
-     * Affiche un message d'erreur rouge.
-     *
-     * @param message Le message d'erreur
-     */
     private void afficherErreur(String message) {
         labelStatut.setText("⚠ " + message);
         labelStatut.setStyle("-fx-text-fill: #f44336;");

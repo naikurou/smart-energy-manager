@@ -8,21 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * DAO (Data Access Object) pour la gestion des bâtiments en base de données.
- * Implémente les opérations CRUD complètes pour l'entité Batiment.
- *
- * <p>Chaque méthode gère sa propre gestion d'erreur et journalise
- * les problèmes SQL pour faciliter le débogage.</p>
- */
 public class BatimentDAO {
 
-    /**
-     * Enregistre un nouveau bâtiment dans la base de données.
-     *
-     * @param batiment Le bâtiment à insérer
-     * @return true si l'insertion a réussi, false sinon
-     */
     public boolean inserer(Batiment batiment) {
         String sql = """
             INSERT INTO batiments
@@ -43,7 +30,7 @@ public class BatimentDAO {
 
             int lignesAffectees = ps.executeUpdate();
 
-            // Récupération de l'ID généré automatiquement
+            // On récupère l'ID auto-généré par SQLite
             if (lignesAffectees > 0) {
                 ResultSet cles = ps.getGeneratedKeys();
                 if (cles.next()) {
@@ -58,12 +45,6 @@ public class BatimentDAO {
         return false;
     }
 
-    /**
-     * Met à jour les informations d'un bâtiment existant.
-     *
-     * @param batiment Le bâtiment à mettre à jour (doit avoir un id valide)
-     * @return true si la mise à jour a réussi, false sinon
-     */
     public boolean mettreAJour(Batiment batiment) {
         String sql = """
             UPDATE batiments SET
@@ -97,12 +78,6 @@ public class BatimentDAO {
         return false;
     }
 
-    /**
-     * Supprime un bâtiment et toutes ses consommations associées (CASCADE).
-     *
-     * @param id L'identifiant du bâtiment à supprimer
-     * @return true si la suppression a réussi, false sinon
-     */
     public boolean supprimer(int id) {
         String sql = "DELETE FROM batiments WHERE id = ?";
 
@@ -118,12 +93,6 @@ public class BatimentDAO {
         return false;
     }
 
-    /**
-     * Recherche un bâtiment par son identifiant.
-     *
-     * @param id L'identifiant du bâtiment
-     * @return Un Optional contenant le bâtiment trouvé, ou vide si inexistant
-     */
     public Optional<Batiment> trouverParId(int id) {
         String sql = "SELECT * FROM batiments WHERE id = ?";
 
@@ -143,11 +112,6 @@ public class BatimentDAO {
         return Optional.empty();
     }
 
-    /**
-     * Récupère la liste complète de tous les bâtiments.
-     *
-     * @return La liste de tous les bâtiments triés par nom
-     */
     public List<Batiment> trouverTous() {
         List<Batiment> batiments = new ArrayList<>();
         String sql = "SELECT * FROM batiments ORDER BY nom";
@@ -165,12 +129,6 @@ public class BatimentDAO {
         return batiments;
     }
 
-    /**
-     * Recherche des bâtiments par type.
-     *
-     * @param type Le type de bâtiment à filtrer
-     * @return La liste des bâtiments du type spécifié
-     */
     public List<Batiment> trouverParType(TypeBatiment type) {
         List<Batiment> batiments = new ArrayList<>();
         String sql = "SELECT * FROM batiments WHERE type = ? ORDER BY nom";
@@ -191,13 +149,6 @@ public class BatimentDAO {
         return batiments;
     }
 
-    /**
-     * Duplique un bâtiment existant en base de données.
-     *
-     * @param batimentOriginal Le bâtiment à cloner
-     * @param nouveauNom       Le nom du nouveau bâtiment
-     * @return Le nouveau bâtiment inséré, ou null si l'opération a échoué
-     */
     public Batiment cloner(Batiment batimentOriginal, String nouveauNom) {
         Batiment clone = batimentOriginal.cloner(nouveauNom);
         if (inserer(clone)) {
@@ -206,14 +157,7 @@ public class BatimentDAO {
         return null;
     }
 
-    /**
-     * Construit un objet Batiment à partir d'une ligne de ResultSet SQL.
-     * Méthode utilitaire interne pour éviter la duplication de code.
-     *
-     * @param rs Le ResultSet positionné sur une ligne
-     * @return L'objet Batiment correspondant
-     * @throws SQLException en cas d'erreur de lecture du ResultSet
-     */
+
     private Batiment construireBatiment(ResultSet rs) throws SQLException {
         Batiment b = new Batiment();
         b.setId(rs.getInt("id"));

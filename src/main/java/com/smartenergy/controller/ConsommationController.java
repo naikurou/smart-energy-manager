@@ -23,14 +23,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.ResourceBundle;
 
-/**
- * Contrôleur pour la gestion des consommations énergétiques.
- * Permet la saisie manuelle, l'import CSV, la génération de données de test,
- * et la visualisation des enregistrements.
- */
 public class ConsommationController implements Initializable {
 
-    // ===== Formulaire de saisie =====
     @FXML private ComboBox<Batiment> comboBatiment;
     @FXML private ComboBox<TypeEnergie> comboTypeEnergie;
     @FXML private DatePicker datePickerDate;
@@ -40,7 +34,6 @@ public class ConsommationController implements Initializable {
     @FXML private TextArea champNote;
     @FXML private CheckBox checkCoutAuto;
 
-    // ===== Tableau des enregistrements =====
     @FXML private TableView<EnergyRecord> tableViewRecords;
     @FXML private TableColumn<EnergyRecord, Integer> colRecordId;
     @FXML private TableColumn<EnergyRecord, String> colRecordDate;
@@ -49,24 +42,16 @@ public class ConsommationController implements Initializable {
     @FXML private TableColumn<EnergyRecord, Double> colRecordCout;
     @FXML private TableColumn<EnergyRecord, String> colRecordSource;
 
-    // ===== Génération de test =====
     @FXML private Spinner<Integer> spinnerNombreJours;
     @FXML private Spinner<Integer> spinnerMesuresParJour;
 
-    // ===== Statut =====
     @FXML private Label labelStatut;
     @FXML private Label labelUnite;
 
-    /** Services métier */
     private final BatimentService batimentService = new BatimentService();
     private final EnergyService energyService = new EnergyService();
-
-    /** Liste observable pour le TableView */
     private ObservableList<EnergyRecord> listeRecords;
 
-    /**
-     * Initialisation de la vue après chargement du FXML.
-     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         configurerColonnes();
@@ -75,9 +60,6 @@ public class ConsommationController implements Initializable {
         configurerEvenements();
     }
 
-    /**
-     * Configure les colonnes du tableau des enregistrements.
-     */
     private void configurerColonnes() {
         colRecordId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colRecordType.setCellValueFactory(new PropertyValueFactory<>("typeEnergie"));
@@ -85,7 +67,7 @@ public class ConsommationController implements Initializable {
         colRecordCout.setCellValueFactory(new PropertyValueFactory<>("coutEstime"));
         colRecordSource.setCellValueFactory(new PropertyValueFactory<>("source"));
 
-        // Colonne date formatée
+        // Affichage custom de la date sans le "T" de LocalDateTime
         colRecordDate.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -101,7 +83,6 @@ public class ConsommationController implements Initializable {
             }
         });
 
-        // Colonne coût formatée en euros
         colRecordCout.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(Double item, boolean empty) {
@@ -111,17 +92,12 @@ public class ConsommationController implements Initializable {
         });
     }
 
-    /**
-     * Configure les valeurs initiales du formulaire.
-     */
     private void configurerFormulaire() {
         comboTypeEnergie.setItems(FXCollections.observableArrayList(TypeEnergie.values()));
         comboTypeEnergie.getSelectionModel().selectFirst();
-
         datePickerDate.setValue(LocalDate.now());
         champHeure.setText(LocalTime.now().getHour() + ":00");
 
-        // Initialisation des Spinners
         if (spinnerNombreJours != null) {
             spinnerNombreJours.setValueFactory(
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 365, 30));
@@ -132,9 +108,6 @@ public class ConsommationController implements Initializable {
         }
     }
 
-    /**
-     * Charge la liste des bâtiments dans la ComboBox.
-     */
     private void chargerBatiments() {
         List<Batiment> batiments = batimentService.trouverTous();
         comboBatiment.setItems(FXCollections.observableArrayList(batiments));
@@ -144,33 +117,26 @@ public class ConsommationController implements Initializable {
         }
     }
 
-    /**
-     * Configure les événements de changement sur les champs.
-     */
+    // Chaîne d'événements : changement bâtiment/énergie/quantité → recalcul auto du coût
     private void configurerEvenements() {
-        // Changement de bâtiment → recharge les enregistrements
         comboBatiment.setOnAction(e -> chargerRecordsBatiment());
 
-        // Changement de type d'énergie → met à jour l'unité affichée
         comboTypeEnergie.setOnAction(e -> {
             TypeEnergie type = comboTypeEnergie.getValue();
             if (type != null && labelUnite != null) {
                 labelUnite.setText(type.getUnite());
             }
-            // Recalcul du coût si coût automatique activé
             if (checkCoutAuto != null && checkCoutAuto.isSelected()) {
                 recalculerCout();
             }
         });
 
-        // Changement de quantité → recalcul du coût si automatique
         champQuantite.textProperty().addListener((obs, ancien, nouveau) -> {
             if (checkCoutAuto != null && checkCoutAuto.isSelected()) {
                 recalculerCout();
             }
         });
 
-        // Activation/désactivation du coût manuel
         if (checkCoutAuto != null) {
             checkCoutAuto.selectedProperty().addListener((obs, ancien, nouveau) -> {
                 if (champCoutManuel != null) {
@@ -181,9 +147,7 @@ public class ConsommationController implements Initializable {
         }
     }
 
-    /**
-     * Recalcule et affiche le coût estimé automatiquement.
-     */
+    // Coût auto = quantité × tarif unitaire du type d'énergie
     private void recalculerCout() {
         try {
             TypeEnergie type = comboTypeEnergie.getValue();
@@ -194,21 +158,14 @@ public class ConsommationController implements Initializable {
         } catch (NumberFormatException ignored) {}
     }
 
-    /**
-     * Charge et affiche les enregistrements du bâtiment sélectionné.
-     */
     private void chargerRecordsBatiment() {
         Batiment batiment = comboBatiment.getValue();
         if (batiment == null) return;
-
         List<EnergyRecord> records = energyService.getRecordsBatiment(batiment.getId());
         listeRecords = FXCollections.observableArrayList(records);
         tableViewRecords.setItems(listeRecords);
     }
 
-    /**
-     * Enregistre manuellement une nouvelle consommation depuis le formulaire.
-     */
     @FXML
     private void enregistrerConsommation() {
         Batiment batiment = comboBatiment.getValue();
@@ -230,7 +187,6 @@ public class ConsommationController implements Initializable {
             EnergyRecord record = new EnergyRecord(batiment.getId(), dateHeure,
                 typeEnergie, quantite, "MANUEL");
 
-            // Coût manuel si activé
             if (checkCoutAuto != null && !checkCoutAuto.isSelected()
                     && champCoutManuel != null && !champCoutManuel.getText().isBlank()) {
                 record.setCoutEstime(Double.parseDouble(champCoutManuel.getText().trim()));
@@ -243,7 +199,6 @@ public class ConsommationController implements Initializable {
                 effacerFormulaire();
                 afficherStatut("✓ Consommation enregistrée avec succès.");
             }
-
         } catch (NumberFormatException e) {
             afficherErreur("Valeur numérique invalide : " + e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -251,9 +206,7 @@ public class ConsommationController implements Initializable {
         }
     }
 
-    /**
-     * Ouvre un sélecteur de fichier et importe les données CSV.
-     */
+    // Import CSV via FileChooser, puis insertion batch dans le service
     @FXML
     private void importerCSV() {
         FileChooser fileChooser = new FileChooser();
@@ -276,9 +229,6 @@ public class ConsommationController implements Initializable {
         }
     }
 
-    /**
-     * Génère des données de test pour le bâtiment sélectionné.
-     */
     @FXML
     private void genererDonneesTest() {
         Batiment batiment = comboBatiment.getValue();
@@ -298,9 +248,6 @@ public class ConsommationController implements Initializable {
             importes, batiment.getNom()));
     }
 
-    /**
-     * Supprime l'enregistrement sélectionné dans le tableau.
-     */
     @FXML
     private void supprimerRecord() {
         EnergyRecord selection = tableViewRecords.getSelectionModel().getSelectedItem();
@@ -323,9 +270,6 @@ public class ConsommationController implements Initializable {
         });
     }
 
-    /**
-     * Efface les champs du formulaire de saisie.
-     */
     @FXML
     private void effacerFormulaire() {
         champQuantite.clear();
@@ -336,7 +280,6 @@ public class ConsommationController implements Initializable {
         comboTypeEnergie.getSelectionModel().selectFirst();
     }
 
-    /** Affiche un message de succès en vert. */
     private void afficherStatut(String message) {
         if (labelStatut != null) {
             labelStatut.setText(message);
@@ -344,7 +287,6 @@ public class ConsommationController implements Initializable {
         }
     }
 
-    /** Affiche un message d'erreur en rouge. */
     private void afficherErreur(String message) {
         if (labelStatut != null) {
             labelStatut.setText("⚠ " + message);

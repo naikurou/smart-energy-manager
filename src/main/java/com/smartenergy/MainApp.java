@@ -9,32 +9,19 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-/**
- * Classe principale de l'application Smart Energy Manager.
- * Point d'entrée de l'application JavaFX.
- * Elle initialise la base de données et charge la vue principale.
- */
 public class MainApp extends Application {
 
-    /**
-     * Méthode de démarrage de l'application JavaFX.
-     * Initialise la base de données, charge le FXML principal et affiche la fenêtre.
-     *
-     * @param primaryStage La fenêtre principale de l'application
-     */
     @Override
     public void start(Stage primaryStage) {
-        // Initialisation de la base de données SQLite
+        // On initialise la BDD au lancement
         DatabaseManager.getInstance().initialiserBase();
 
         try {
-            // Chargement de la vue principale depuis le fichier FXML
             FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/fxml/MainView.fxml")
             );
             Parent root = loader.load();
 
-            // Configuration de la scène principale
             Scene scene = new Scene(root, 1280, 800);
             scene.getStylesheets().add(
                 getClass().getResource("/css/style.css").toExternalForm()
@@ -52,20 +39,12 @@ public class MainApp extends Application {
         }
     }
 
-    /**
-     * Méthode appelée à la fermeture de l'application.
-     * Ferme proprement la connexion à la base de données.
-     */
+    // Ferme proprement la connexion BDD à la sortie
     @Override
     public void stop() {
         DatabaseManager.getInstance().fermerConnexion();
     }
 
-    /**
-     * Point d'entrée principal Java.
-     *
-     * @param args Arguments de ligne de commande
-     */
     public static void main(String[] args) {
         launch(args);
     }

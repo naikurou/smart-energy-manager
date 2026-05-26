@@ -5,35 +5,15 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Gestionnaire de la base de données SQLite.
- * Implémente le pattern Singleton pour garantir une seule connexion active.
- *
- * <p>Cette classe gère le cycle de vie complet de la connexion SQLite :
- * initialisation, création des tables si nécessaire, et fermeture propre.</p>
- */
+// Singleton pour garantir une seule connexion à la BDD
 public class DatabaseManager {
 
-    /** URL de connexion SQLite — le fichier est créé dans le répertoire d'exécution */
     private static String urlBdd = "jdbc:sqlite:smart_energy.db";
-
-    /** Instance unique du gestionnaire (pattern Singleton) */
     private static DatabaseManager instance;
-
-    /** Connexion active à la base de données */
     private Connection connexion;
 
-    /**
-     * Constructeur privé — empêche l'instanciation directe.
-     */
     private DatabaseManager() {}
 
-    /**
-     * Retourne l'instance unique du DatabaseManager.
-     * Crée l'instance si elle n'existe pas encore.
-     *
-     * @return L'instance singleton du DatabaseManager
-     */
     public static synchronized DatabaseManager getInstance() {
         if (instance == null) {
             instance = new DatabaseManager();
@@ -41,11 +21,7 @@ public class DatabaseManager {
         return instance;
     }
 
-    /**
-     * Permet de modifier l'URL de la base de données (très utile pour utiliser une base en mémoire lors des tests).
-     *
-     * @param url La nouvelle URL JDBC SQLite
-     */
+    // Permet de changer l'URL, utile pour les tests avec une base en mémoire
     public static synchronized void setDatabaseUrl(String url) {
         urlBdd = url;
         if (instance != null) {
@@ -53,18 +29,11 @@ public class DatabaseManager {
         }
     }
 
-    /**
-     * Retourne la connexion active à la base de données.
-     * Crée une nouvelle connexion si elle n'existe pas ou est fermée.
-     *
-     * @return La connexion SQLite active
-     * @throws RuntimeException si la connexion échoue
-     */
     public Connection getConnexion() {
         try {
             if (connexion == null || connexion.isClosed()) {
                 connexion = DriverManager.getConnection(urlBdd);
-                // Active les clés étrangères (désactivées par défaut dans SQLite)
+                // Les clés étrangères sont désactivées par défaut dans SQLite
                 connexion.createStatement().execute("PRAGMA foreign_keys = ON");
             }
         } catch (SQLException e) {
@@ -73,14 +42,10 @@ public class DatabaseManager {
         return connexion;
     }
 
-    /**
-     * Initialise la base de données en créant les tables si elles n'existent pas.
-     * Cette méthode est appelée au démarrage de l'application.
-     */
     public void initialiserBase() {
         try (Statement stmt = getConnexion().createStatement()) {
 
-            // ===== TABLE BATIMENTS =====
+            // Table bâtiments
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS batiments (
                     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -94,7 +59,7 @@ public class DatabaseManager {
                 )
             """);
 
-            // ===== TABLE ENERGY_RECORDS =====
+            // Table consommations énergétiques
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS energy_records (
                     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,7 +74,7 @@ public class DatabaseManager {
                 )
             """);
 
-            // Index pour accélérer les recherches par bâtiment et date
+            // Index pour accélérer les recherches fréquentes
             stmt.execute("""
                 CREATE INDEX IF NOT EXISTS idx_records_batiment
                 ON energy_records (batiment_id)
@@ -127,10 +92,6 @@ public class DatabaseManager {
         }
     }
 
-    /**
-     * Ferme proprement la connexion à la base de données.
-     * Doit être appelée lors de la fermeture de l'application.
-     */
     public void fermerConnexion() {
         try {
             if (connexion != null && !connexion.isClosed()) {

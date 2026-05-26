@@ -21,46 +21,27 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Contrôleur pour les visualisations graphiques des consommations énergétiques.
- * Génère plusieurs types de graphiques JavaFX Charts :
- * - Courbe temporelle de consommation
- * - Histogramme par type d'énergie
- * - Comparaison multi-bâtiments
- * - Répartition en camembert par énergie
- *
- * <p>Les graphiques sont recalculés dynamiquement selon le bâtiment
- * et la période sélectionnés par l'utilisateur.</p>
- */
 public class ChartsController implements Initializable {
 
-    // ===== Filtres =====
     @FXML private ComboBox<Batiment> comboBatiment;
     @FXML private ComboBox<String> comboPeriode;
 
-    // ===== Graphiques =====
     @FXML private LineChart<String, Number> lineChartTemporel;
     @FXML private BarChart<String, Number> barChartParEnergie;
     @FXML private PieChart pieChartRepartition;
     @FXML private BarChart<String, Number> barChartComparaison;
 
-    // ===== Analyse texte =====
     @FXML private Label labelAnalyse;
     @FXML private Label labelTendance;
     @FXML private Label labelEnergieDominante;
     @FXML private Label labelEstimationFacture;
 
-    /** Services métier */
     private final BatimentService batimentService = new BatimentService();
     private final EnergyService energyService = new EnergyService();
 
-    /** Format de date pour les axes */
     private static final DateTimeFormatter FMT_JOUR = DateTimeFormatter.ofPattern("dd/MM");
     private static final DateTimeFormatter FMT_MOIS = DateTimeFormatter.ofPattern("MM/yyyy");
 
-    /**
-     * Initialisation de la vue.
-     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         chargerBatiments();
@@ -68,9 +49,6 @@ public class ChartsController implements Initializable {
         configurerEvenements();
     }
 
-    /**
-     * Charge la liste des bâtiments dans la ComboBox de sélection.
-     */
     private void chargerBatiments() {
         List<Batiment> batiments = batimentService.trouverTous();
         comboBatiment.setItems(FXCollections.observableArrayList(batiments));
@@ -79,9 +57,6 @@ public class ChartsController implements Initializable {
         }
     }
 
-    /**
-     * Configure les périodes disponibles pour l'analyse.
-     */
     private void configurerComboPeriode() {
         comboPeriode.setItems(FXCollections.observableArrayList(
             "7 derniers jours",
@@ -90,20 +65,14 @@ public class ChartsController implements Initializable {
             "6 derniers mois",
             "12 derniers mois"
         ));
-        comboPeriode.getSelectionModel().select(1); // 30 jours par défaut
+        comboPeriode.getSelectionModel().select(1);
     }
 
-    /**
-     * Configure les événements pour actualiser les graphiques.
-     */
     private void configurerEvenements() {
         comboBatiment.setOnAction(e -> actualiserGraphiques());
         comboPeriode.setOnAction(e -> actualiserGraphiques());
     }
 
-    /**
-     * Actualise tous les graphiques selon les filtres sélectionnés.
-     */
     @FXML
     public void actualiserGraphiques() {
         Batiment batiment = comboBatiment.getValue();
@@ -123,18 +92,11 @@ public class ChartsController implements Initializable {
         actualiserAnalyse(batiment);
     }
 
-    /**
-     * Génère la courbe temporelle de consommation pour un bâtiment.
-     * Une série par type d'énergie, valeurs agrégées par jour.
-     *
-     * @param records   Les enregistrements à afficher
-     * @param nomBatiment Le nom du bâtiment (pour le titre)
-     */
+    // Une série par type d'énergie, valeurs agrégées par jour via TreeMap pour garder l'ordre
     private void genererCourbeTemporelle(List<EnergyRecord> records, String nomBatiment) {
         lineChartTemporel.getData().clear();
         lineChartTemporel.setTitle("Évolution de la consommation — " + nomBatiment);
 
-        // Groupement par type d'énergie
         Map<TypeEnergie, List<EnergyRecord>> parType = records.stream()
             .collect(Collectors.groupingBy(EnergyRecord::getTypeEnergie));
 
@@ -142,7 +104,6 @@ public class ChartsController implements Initializable {
             XYChart.Series<String, Number> serie = new XYChart.Series<>();
             serie.setName(entree.getKey().getLibelle());
 
-            // Agrégation par jour
             Map<LocalDate, Double> parJour = new TreeMap<>();
             for (EnergyRecord r : entree.getValue()) {
                 LocalDate jour = r.getDateHeure().toLocalDate();
@@ -160,11 +121,7 @@ public class ChartsController implements Initializable {
         }
     }
 
-    /**
-     * Génère un histogramme de la consommation totale par type d'énergie.
-     *
-     * @param records Les enregistrements à analyser
-     */
+    // Histogramme avec double série : quantité + coût estimé
     private void genererHistogrammeParEnergie(List<EnergyRecord> records) {
         barChartParEnergie.getData().clear();
         barChartParEnergie.setTitle("Consommation par type d'énergie");
@@ -175,7 +132,6 @@ public class ChartsController implements Initializable {
         XYChart.Series<String, Number> serieCout = new XYChart.Series<>();
         serieCout.setName("Coût estimé (€)");
 
-        // Totaux par type d'énergie
         Map<TypeEnergie, Double> totauxQuantite = records.stream()
             .collect(Collectors.groupingBy(
                 EnergyRecord::getTypeEnergie,
@@ -198,11 +154,7 @@ public class ChartsController implements Initializable {
         barChartParEnergie.getData().addAll(serieQuantite, serieCout);
     }
 
-    /**
-     * Génère un diagramme camembert de la répartition par type d'énergie (en coût).
-     *
-     * @param records Les enregistrements à analyser
-     */
+    // Camembert basé sur les coûts (pas les quantités) pour mieux refléter l'impact financier
     private void genererCamembert(List<EnergyRecord> records) {
         pieChartRepartition.getData().clear();
         pieChartRepartition.setTitle("Répartition des coûts par énergie");
@@ -226,19 +178,12 @@ public class ChartsController implements Initializable {
         }
     }
 
-    /**
-     * Génère un histogramme comparatif entre tous les bâtiments.
-     *
-     * @param debut Date de début de la période
-     * @param fin   Date de fin de la période
-     */
     private void genererComparaisonBatiments(LocalDateTime debut, LocalDateTime fin) {
         barChartComparaison.getData().clear();
         barChartComparaison.setTitle("Comparaison des consommations — Tous bâtiments");
 
         List<Batiment> batiments = batimentService.trouverTous();
 
-        // Une série par type d'énergie
         for (TypeEnergie type : TypeEnergie.values()) {
             XYChart.Series<String, Number> serie = new XYChart.Series<>();
             serie.setName(type.getLibelle());
@@ -252,7 +197,6 @@ public class ChartsController implements Initializable {
                     .mapToDouble(EnergyRecord::getQuantite)
                     .sum();
 
-                // Tronquer le nom si trop long
                 String nomBatiment = b.getNom().length() > 15
                     ? b.getNom().substring(0, 12) + "..."
                     : b.getNom();
@@ -264,20 +208,14 @@ public class ChartsController implements Initializable {
         }
     }
 
-    /**
-     * Met à jour les labels d'analyse textuelle pour le bâtiment sélectionné.
-     *
-     * @param batiment Le bâtiment à analyser
-     */
     private void actualiserAnalyse(Batiment batiment) {
-        // Énergie dominante
         TypeEnergie dominante = energyService.getEnergieDominante(batiment.getId());
         if (labelEnergieDominante != null) {
             labelEnergieDominante.setText(dominante != null
                 ? dominante.getLibelle() : "Aucune donnée");
         }
 
-        // Tendance mensuelle
+        // Tendance : vert si ça baisse, rouge si ça monte trop
         double tendance = energyService.calculerTendance(batiment.getId());
         if (labelTendance != null) {
             String symbole = tendance >= 0 ? "▲ +" : "▼ ";
@@ -286,18 +224,12 @@ public class ChartsController implements Initializable {
             labelTendance.setStyle("-fx-text-fill: " + couleur + ";");
         }
 
-        // Estimation de facture mensuelle
         double facture = energyService.estimerFactureMensuelle(batiment.getId());
         if (labelEstimationFacture != null) {
             labelEstimationFacture.setText(String.format("%.2f €/mois", facture));
         }
     }
 
-    /**
-     * Retourne la période [debut, fin] correspondant au filtre sélectionné.
-     *
-     * @return Un tableau [début, fin] de LocalDateTime
-     */
     private LocalDateTime[] getPeriode() {
         LocalDateTime fin = LocalDateTime.now();
         LocalDateTime debut = switch (comboPeriode.getValue()) {
@@ -305,7 +237,7 @@ public class ChartsController implements Initializable {
             case "3 derniers mois"    -> fin.minusMonths(3);
             case "6 derniers mois"    -> fin.minusMonths(6);
             case "12 derniers mois"   -> fin.minusMonths(12);
-            default                   -> fin.minusDays(30); // 30 jours par défaut
+            default                   -> fin.minusDays(30);
         };
         return new LocalDateTime[]{debut, fin};
     }
